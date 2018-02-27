@@ -1,0 +1,16 @@
+[
+{
+  "modid": "guilogin",
+  "name": "GUILogin",
+  "description": "GUILogin",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["aleck099"],
+  "credits": " ",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
