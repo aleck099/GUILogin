@@ -1,8 +1,15 @@
-package tk.dwcdn.p.db;
+package guilogin.db;
 
 public class Account {
 
+	/**
+	 * 用户名
+	 */
 	public final String name;
+
+	/**
+	 * 密码（加密）
+	 */
 	private String passwd;
 
 	public String getPasswd() {

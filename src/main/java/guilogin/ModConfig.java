@@ -1,16 +1,17 @@
-package tk.dwcdn.p;
+package guilogin;
 
 import java.io.*;
 import java.nio.charset.Charset;
 
 public class ModConfig {
-	private boolean isEnabled;
-	private int timeOut; //单位是秒
+	private boolean isEnabled = false;
+	private int timeOut = 60; //单位是秒
 
 	public ModConfig(File cfgFile) throws IOException {
 		if (!cfgFile.exists()) {
 			cfgFile.getParentFile().mkdirs();
 			createConfigFile(cfgFile);
+			GUILogin.modLogger.warn("Config file not found, creating a new one.");
 		}
 
 		BufferedReader iReader = null;
@@ -29,10 +30,7 @@ public class ModConfig {
 
 			// 匹配
 			if (data[0].equals("enabled")) {
-				if (data[1].equals("true"))
-					this.isEnabled = true;
-				else
-					this.isEnabled = false;
+				this.isEnabled = data[1].equals("true");
 			} else if (data[0].equals("timeout")) {
 				Integer timeout;
 				try {
@@ -43,6 +41,10 @@ public class ModConfig {
 				this.timeOut = timeout;
 			}
 		}
+
+		GUILogin.modLogger.info("Successfully loaded the config file.");
+		GUILogin.modLogger.info("enabled = " + isEnabled);
+		GUILogin.modLogger.info("timeout = " + timeOut);
 	}
 
 	private static void createConfigFile(File file) throws IOException {
@@ -66,7 +68,7 @@ public class ModConfig {
 		fOut.close();
 	}
 
-	public boolean getIsEnabled() {
+	public boolean isModEnabled() {
 		return this.isEnabled;
 	}
 

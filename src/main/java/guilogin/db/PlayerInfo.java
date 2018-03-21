@@ -1,9 +1,10 @@
-package tk.dwcdn.p.db;
+package guilogin.db;
 
+import guilogin.GUILogin;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameType;
-import tk.dwcdn.p.GUILogin;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -11,6 +12,10 @@ import java.util.Set;
 
 public class PlayerInfo {
 	public final double X, Y, Z;
+
+	/**
+	 * 玩家登录的时间
+	 */
 	public final int tick;
 	public final GameType gameType;
 
@@ -32,8 +37,13 @@ public class PlayerInfo {
 			Iterator<Map.Entry<String, PlayerInfo>> it = entries.iterator();
 			while (it.hasNext()) {
 				Map.Entry<String, PlayerInfo> one = it.next();
-				if (one.getValue().tick + (60 * 20) < currentTick) {
-					sv.getPlayerList().getPlayerByUsername(one.getKey()).connection.disconnect(new TextComponentString("你没有在60秒内完成登录，系统把你踢出"));
+				/*
+				超时检测
+				 */
+				if (one.getValue().tick + (GUILogin.instance.config.getTimeOut() * 20) < currentTick) {
+					EntityPlayerMP player = sv.getPlayerList().getPlayerByUsername(one.getKey());
+					if (player != null)
+						player.connection.disconnect(new TextComponentTranslation("gl.login.timeout", GUILogin.instance.config.getTimeOut()));
 					it.remove();
 				}
 			}

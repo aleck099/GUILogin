@@ -1,4 +1,4 @@
-package tk.dwcdn.p.db;
+package guilogin.db;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -48,30 +48,57 @@ public class AccountMgr {
 		return null;
 	}
 
-	private byte[] encrypt(String clearText) {
+	/**
+	 * 把明文加密
+	 *
+	 * @param clearText 明文密码
+	 * @param salt      不用说了吧
+	 * @return 加密后的字节，如果加密失败将返回 <code>null</code>
+	 */
+	private byte[] encrypt(String clearText, String salt) {
 		MessageDigest dg = null;
 		try {
 			dg = MessageDigest.getInstance("SHA-256");
-			dg.update(clearText.getBytes("utf-8"));
 		} catch (NoSuchAlgorithmException e) {
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			return null;
 		}
+		StringBuilder bu = new StringBuilder();
+		bu.append(clearText);
+		/*给密码加盐*/
+		bu.append(salt);
+		dg.update(bu.toString().getBytes(Charset.forName("utf-8")));
 		return dg.digest();
 	}
 
+	/**
+	 * 添加账户，对于新注册的用户
+	 *
+	 * @param name          用户名
+	 * @param clearPassword 明文密码
+	 */
 	public void addAccount(String name, String clearPassword) {
-		byte[] passwd = encrypt(clearPassword);
+		byte[] passwd = encrypt(clearPassword, name);
 		this.accounts.add(new Account(name, byte2str(passwd)));
 	}
 
+	/**
+	 * 重设用户的密码
+	 *
+	 * @param name    用户名
+	 * @param newPass 新密码
+	 */
 	public void resetPasswd(String name, String newPass) {
 		Account a = findByName(name);
 		if (a == null)
 			return;
-		a.resetPasswd(byte2str(encrypt(newPass)));
+		a.resetPasswd(byte2str(encrypt(newPass, name)));
 	}
 
+	/**
+	 * 删除帐号
+	 *
+	 * @param name 要删除的用户名
+	 */
 	public void deleteAccount(String name) {
 		synchronized (this.accounts) {
 			Iterator<Account> it = this.accounts.iterator();
@@ -83,6 +110,9 @@ public class AccountMgr {
 		}
 	}
 
+	/**
+	 * 把数据库写入文件
+	 */
 	public void writeToFile() {
 		try {
 			this.cfgFile.delete();
@@ -99,6 +129,9 @@ public class AccountMgr {
 		}
 	}
 
+	/**
+	 * 从文件中读取数据
+	 */
 	public void readFromFile() {
 		try {
 			BufferedReader iReader = new BufferedReader(new InputStreamReader(new FileInputStream(this.cfgFile), Charset.forName("utf-8")));
@@ -119,17 +152,27 @@ public class AccountMgr {
 		}
 	}
 
-	public boolean checkUser(String name, String itsPasswd) throws PlayerNotRegisteredException {
+	/**
+	 * 用户密码验证
+	 *
+	 * @param name      用户名
+	 * @param itsPasswd 明文密码
+	 * @return true 代表密码正确， false 代表密码错误
+	 */
+	public boolean checkUser(String name, String itsPasswd) {
 		Account a = findByName(name);
 		if (a == null)
-			throw new PlayerNotRegisteredException();
-		if (a.getPasswd().equals(byte2str(encrypt(itsPasswd)))) {
-			return true;
-		} else {
 			return false;
-		}
+		byte[] encryptedPassword = encrypt(itsPasswd, name);
+		return a.getPasswd().equals(byte2str(encryptedPassword));
 	}
 
+	/**
+	 * 检查用户名合法性，含有火星文的一律T掉
+	 *
+	 * @param name 用户名
+	 * @return 用户名是否合法
+	 */
 	public static boolean checkName(String name) {
 		// length must greater than 3 and less than 32
 		if (name.length() < 3 || name.length() > 32) {
@@ -151,6 +194,12 @@ public class AccountMgr {
 		return true;
 	}
 
+	/**
+	 * 查询数据库，判断用户是否已经注册
+	 *
+	 * @param name 用户名
+	 * @return true 代表用户已经注册过了， false 代表用户是新来的
+	 */
 	public boolean isRegistered(String name) {
 		if (findByName(name) == null)
 			return false;
@@ -159,6 +208,8 @@ public class AccountMgr {
 	}
 
 	private String byte2str(byte[] b) {
+		if (b == null)
+			return "";
 		StringBuffer sb = new StringBuffer();
 		for (int lo = 0; lo < b.length; lo++) {
 			byte bt = b[lo];
@@ -167,10 +218,12 @@ public class AccountMgr {
 		return sb.toString();
 	}
 
-	public class PlayerNotRegisteredException extends Exception {
-
-	}
-
+	/**
+	 * 找出符合 prefix 前缀的用户
+	 *
+	 * @param prefix 前缀
+	 * @return 匹配的用户
+	 */
 	public List<String> matches(String prefix) {
 		List<String> ls = new ArrayList<>();
 		synchronized (this.accounts) {
@@ -182,6 +235,11 @@ public class AccountMgr {
 		return ls;
 	}
 
+	/**
+	 * 获取所有用户
+	 *
+	 * @return 所有用户
+	 */
 	public List<String> getAccounts() {
 		List<String> ls = new ArrayList<>();
 		synchronized (this.accounts) {

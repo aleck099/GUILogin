@@ -1,0 +1,4 @@
+gl.login.success=§aLogin Successful!
+gl.login.timeout=You must login or register in %s seconds!
+gl.login.illegalname=Your name is illegal.
+gl.reg.success=§aSuccessfully registered!
