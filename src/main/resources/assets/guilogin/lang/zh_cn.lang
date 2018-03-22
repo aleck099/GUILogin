@@ -1,0 +1,9 @@
+
+gl.login.request.login=请输入密码：
+gl.login.request.register=请设置您的密码来注册账号，以后使用该密码登录游戏
+gl.login.request.wrong=§c§l密码错误！请重新输入！
+
+gl.login.success=§a成功登录！
+gl.login.timeout=你必须在%s秒内完成登录！
+gl.login.illegalname=用户名里不得含有特殊字符！
+gl.reg.success=§a成功注册！

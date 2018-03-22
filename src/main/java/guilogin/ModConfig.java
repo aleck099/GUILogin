@@ -7,11 +7,24 @@ public class ModConfig {
 	private boolean isEnabled = false;
 	private int timeOut = 60; //单位是秒
 
+	/**
+	 * for client side
+	 */
+	public ModConfig() {
+		this.isEnabled = true;
+		this.timeOut = 60;
+	}
+
+	/**
+	 * for server side
+	 * @param cfgFile config file
+	 * @throws IOException If any I/O error ???s
+	 */
 	public ModConfig(File cfgFile) throws IOException {
 		if (!cfgFile.exists()) {
 			cfgFile.getParentFile().mkdirs();
 			createConfigFile(cfgFile);
-			GUILogin.modLogger.warn("Config file not found, creating a new one.");
+			GUILogin.modLogger.info("Config file not found, creating one.");
 		}
 
 		BufferedReader iReader = null;
@@ -42,9 +55,8 @@ public class ModConfig {
 			}
 		}
 
-		GUILogin.modLogger.info("Successfully loaded the config file.");
-		GUILogin.modLogger.info("enabled = " + isEnabled);
-		GUILogin.modLogger.info("timeout = " + timeOut);
+		GUILogin.modLogger.info("ModConfig: enabled = " + isEnabled);
+		GUILogin.modLogger.info("ModConfig: timeout = " + timeOut);
 	}
 
 	private static void createConfigFile(File file) throws IOException {

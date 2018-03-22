@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.Logger;
 
@@ -56,12 +57,11 @@ public class GUILogin {
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
+		GUILogin.modLogger = event.getModLog();
 		/*读取配置文件*/
-		try {
-			GUILogin.instance.config = new ModConfig(new File(event.getModConfigurationDirectory(), NAME));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		proxy.configInit(event.getModConfigurationDirectory());
+
+		modLogger.warn("GUILogin mod is not enabled! You can enable it in config/GUILogin.cfg");
 		/*只有在配置文件中启用mod，才会生效*/
 		if (config.isModEnabled())
 			proxy.preInit(event);
@@ -76,6 +76,12 @@ public class GUILogin {
 	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
 		server = event.getServer();
+	}
+
+	@Mod.EventHandler
+	public void onServerStopping(FMLServerStoppingEvent event) {
+		if (config.isModEnabled())
+			accountMgr.writeToFile();
 	}
 
 }

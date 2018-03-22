@@ -122,7 +122,7 @@ public class IgnoreHandler {
 			玩家移动了？
 			 */
 			if (player.posX != info.X || player.posY != info.Y || player.posZ != info.Z)
-				player.setPosition(info.X, info.Y, info.Z);
+				player.setPositionAndUpdate(info.X, info.Y, info.Z);
 		}
 	}
 

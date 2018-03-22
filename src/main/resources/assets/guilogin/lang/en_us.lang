@@ -1,3 +1,8 @@
+
+gl.login.request.login=Please enter your password:
+gl.login.request.register=Please set your password to register:
+gl.login.request.wrong=§c§lWrong password! Please enter again:
+
 gl.login.success=§aLogin Successful!
 gl.login.timeout=You must login or register in %s seconds!
 gl.login.illegalname=Your name is illegal.

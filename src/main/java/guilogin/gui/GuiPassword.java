@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.resources.I18n;
 
 import java.io.IOException;
 
@@ -21,17 +22,17 @@ public class GuiPassword extends GuiScreen {
 
 	public GuiPassword(GuiScreen parent, String info) {
 		this.parent = parent;
-		this.extraInfo = info;
+		this.extraInfo = I18n.format(info);
 	}
 
 	@Override
 	public void initGui() {
-		psField = new GuiTextField(0, fontRenderer, (width / 2) - 100, (int)(height * 0.4), 200, 50);
+		psField = new GuiTextField(0, fontRenderer, (width / 2) - 100, (int)(height * 0.4), 200, 20);
 		psField.setMaxStringLength(128);
 		psField.setFocused(true);
 		psField.setCanLoseFocus(false);
 
-		buttonList.add(new GuiButton(BUTTON_ID, width / 2 - 20, (int)(height * 0.7), "确定"));
+		buttonList.add(new GuiButton(BUTTON_ID, width / 2 - 20, (int)(height * 0.7), 40, 20, "确定"));
 	}
 
 	@Override
@@ -42,10 +43,15 @@ public class GuiPassword extends GuiScreen {
 			 */
 			String passwd = psField.getText();
 			Minecraft.getMinecraft().displayGuiScreen(parent);
-			LoginMessage msg = new LoginMessage();
-			msg.setPacket(new ClientLoginPacket(passwd));
-			GUILogin.netWrapper.sendToServer(new LoginMessage());
+			GUILogin.netWrapper.sendToServer(new LoginMessage(new ClientLoginPacket(passwd)));
 		}
+	}
+
+	@Override
+	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+		if (psField.textboxKeyTyped(typedChar, keyCode))
+			return;
+		super.keyTyped(typedChar, keyCode);
 	}
 
 	@Override
@@ -64,5 +70,6 @@ public class GuiPassword extends GuiScreen {
 		比如 密码错误 输入密码 注册 等等
 		 */
 		drawCenteredString(fontRenderer, extraInfo, (int)(width * 0.5), (int)(height * 0.1), 0xffff00);
+		psField.drawTextBox();
 	}
 }

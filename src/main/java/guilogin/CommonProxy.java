@@ -20,17 +20,28 @@ import java.util.LinkedHashMap;
 
 public class CommonProxy {
 
+	public void configInit(File cfgDir) {
+		try {
+			GUILogin.instance.config = new ModConfig(new File(cfgDir, GUILogin.NAME + ".cfg"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void preInit(FMLPreInitializationEvent event) {
-		GUILogin.instance.modLogger = event.getModLog();
 
 		try {
 			GUILogin.instance.accountMgr = new AccountMgr(new File(event.getModConfigurationDirectory(), "passwd.txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		/*从文件中加载用户信息*/
+		GUILogin.instance.accountMgr.readFromFile();
+
 		GUILogin.instance.notLoggedins = new LinkedHashMap<>();
 
-		NetworkRegistry.INSTANCE.newSimpleChannel(GUILogin.MODID);
+		GUILogin.netWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(GUILogin.MODID);
 	}
 
 	public void init(FMLInitializationEvent event) {
@@ -46,8 +57,13 @@ public class CommonProxy {
 	public static class ClientProxy extends CommonProxy {
 
 		@Override
+		public void configInit(File cfgDir) {
+			GUILogin.instance.config = new ModConfig();
+		}
+
+		@Override
 		public void preInit(FMLPreInitializationEvent event) {
-			NetworkRegistry.INSTANCE.newSimpleChannel(GUILogin.MODID);
+			GUILogin.netWrapper = NetworkRegistry.INSTANCE.newSimpleChannel(GUILogin.MODID);
 		}
 
 		@Override
