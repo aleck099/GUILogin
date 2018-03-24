@@ -12,8 +12,6 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 
 @Mod(modid = GUILogin.MODID, version = GUILogin.VERSION, name = GUILogin.NAME)
@@ -21,7 +19,7 @@ public class GUILogin {
 
 	public static final String
 			MODID = "guilogin",
-			VERSION = "1.0",
+			VERSION = "1.0.1",
 			NAME = "GUILogin";
 
 	public static Logger modLogger;
@@ -61,10 +59,11 @@ public class GUILogin {
 		/*读取配置文件*/
 		proxy.configInit(event.getModConfigurationDirectory());
 
-		modLogger.warn("GUILogin mod is not enabled! You can enable it in config/GUILogin.cfg");
 		/*只有在配置文件中启用mod，才会生效*/
 		if (config.isModEnabled())
 			proxy.preInit(event);
+		else
+			modLogger.warn("§eGUILogin mod is not enabled! You can enable it in config/GUILogin.cfg");
 	}
 
 	@Mod.EventHandler

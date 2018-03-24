@@ -4,10 +4,8 @@ import guilogin.GUILogin;
 import guilogin.network.packets.AbstractPacket;
 import guilogin.network.packets.ClientLoginPacket;
 import guilogin.network.packets.ServerRequestLoginPacket;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.GameType;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -20,6 +18,8 @@ public class ServerMessageHandler implements IMessageHandler<LoginMessage, IMess
 			String passwd = ((ClientLoginPacket) packet).password;
 			EntityPlayerMP player = ctx.getServerHandler().player;
 
+			GUILogin.modLogger.info("Player " + player.getName() + " sent a ClientLoginPacket to server");
+
 			if (GUILogin.instance.accountMgr.isRegistered(player.getName())) {
 				/*对于已经注册过了的玩家*/
 				if (GUILogin.instance.accountMgr.checkUser(player.getName(), passwd)) {
@@ -28,8 +28,10 @@ public class ServerMessageHandler implements IMessageHandler<LoginMessage, IMess
 					player.setGameType(GUILogin.instance.notLoggedins.get(player.getName()).gameType);
 					GUILogin.instance.notLoggedins.remove(player.getName());
 					player.sendMessage(new TextComponentTranslation("gl.login.success"));
+					GUILogin.modLogger.info("Player " + player.getName() + " entered §bcorrect§r password");
 				} else {
 					/*密码错误，重新登陆去*/
+					GUILogin.modLogger.info("Player " + player.getName() + " entered §cwrong§r password");
 					return new LoginMessage(new ServerRequestLoginPacket("gl.login.request.wrong"));
 				}
 			} else {
@@ -38,6 +40,7 @@ public class ServerMessageHandler implements IMessageHandler<LoginMessage, IMess
 				player.setGameType(GUILogin.instance.notLoggedins.get(player.getName()).gameType);
 				GUILogin.instance.notLoggedins.remove(player.getName());
 				player.sendMessage(new TextComponentTranslation("gl.reg.success"));
+				GUILogin.modLogger.info("Player " + player.getName() + " registered");
 			}
 		}
 
