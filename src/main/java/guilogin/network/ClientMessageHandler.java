@@ -15,6 +15,9 @@ public class ClientMessageHandler implements IMessageHandler<LoginMessage, IMess
 		if (packet instanceof ServerRequestLoginPacket) {
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				Minecraft mc = Minecraft.getMinecraft();
+				/*显示两次密码输入框？？？不可能！*/
+				if (mc.currentScreen instanceof GuiPassword)
+					((GuiPassword) mc.currentScreen).close();
 				mc.displayGuiScreen(new GuiPassword(mc.currentScreen, ((ServerRequestLoginPacket) packet).extraInfo));
 			});
 		}

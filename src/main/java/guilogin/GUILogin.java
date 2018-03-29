@@ -19,7 +19,7 @@ public class GUILogin {
 
 	public static final String
 			MODID = "guilogin",
-			VERSION = "1.0.3",
+			VERSION = "1.0.4",
 			NAME = "GUILogin";
 
 	public static Logger modLogger;

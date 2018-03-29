@@ -2,6 +2,8 @@ package guilogin.event;
 
 import guilogin.GUILogin;
 import guilogin.db.PlayerInfo;
+import guilogin.network.LoginMessage;
+import guilogin.network.packets.ServerRequestLoginPacket;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -121,8 +123,11 @@ public class IgnoreHandler {
 			/*
 			玩家移动了？
 			 */
-			if (player.posX != info.X || player.posY != info.Y || player.posZ != info.Z)
+			if (player.posX != info.X || player.posY != info.Y || player.posZ != info.Z) {
 				player.setPositionAndUpdate(info.X, info.Y, info.Z);
+				/*再次发送登录消息*/
+				GUILogin.netWrapper.sendTo(new LoginMessage(new ServerRequestLoginPacket("gl.login.request.login")), player);
+			}
 		}
 	}
 

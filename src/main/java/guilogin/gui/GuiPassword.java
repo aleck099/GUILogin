@@ -42,7 +42,7 @@ public class GuiPassword extends GuiScreen {
 			关掉Gui，发送登录信息
 			 */
 			String passwd = psField.getText();
-			Minecraft.getMinecraft().displayGuiScreen(parent);
+			this.close();
 			GUILogin.netWrapper.sendToServer(new LoginMessage(new ClientLoginPacket(passwd)));
 		}
 	}
@@ -71,5 +71,9 @@ public class GuiPassword extends GuiScreen {
 		 */
 		drawCenteredString(fontRenderer, extraInfo, (int)(width * 0.5), (int)(height * 0.1), 0xffff00);
 		psField.drawTextBox();
+	}
+
+	public void close() {
+		Minecraft.getMinecraft().displayGuiScreen(parent);
 	}
 }
