@@ -25,10 +25,10 @@ public class PlayerSessionHandler {
 			return;
 		}
 		String name = player.getName();
-		player.mcServer.logInfo("§bPlayer " + name + " tried to log in");
+		GUILogin.modLogger.info("§bPlayer " + name + " tried to log in");
 		if (!AccountMgr.checkName(name)) {
 			/*非法名*/
-			GUILogin.modLogger.warn("Player " + name + " tried to log in but failed because of his illegal name");
+			GUILogin.modLogger.warn("Player " + name + " tried to log in but failed because of his §cillegal§r name");
 			GUILogin.server.addScheduledTask(() -> player.connection.disconnect(new TextComponentTranslation("gl.login.illegalname")));
 			return;
 		}
@@ -43,12 +43,19 @@ public class PlayerSessionHandler {
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+		GUILogin.modLogger.info("A player is leaving");
 		if (!(event.player instanceof FakePlayer) && GUILogin.instance.notLoggedins.containsKey(event.player.getName())) {
 			PlayerInfo info = GUILogin.instance.notLoggedins.get(event.player.getName());
 			/*不知道为什么，有时候玩家登录时不触发PlayerLoggedInEvent，却会触发PlayerLoggedOutEvent*/
 			if (info == null)
 				return;
-			event.player.setGameType(info.gameType);
+			try {
+				event.player.setGameType(info.gameType);
+			} catch (Throwable t) {
+				/*
+				不知道为什么，如果玩家登录到一半掉线了，这里会拋NullPointerException。求大神解释
+				 */
+			}
 			GUILogin.modLogger.info("Player " + event.player.getName() + " logged out without entering password");
 			GUILogin.modLogger.info("Reseting his gamemode");
 		}

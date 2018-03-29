@@ -14,15 +14,8 @@ public class LoginMessage implements IMessage {
 		this.packet = packet;
 	}
 
-	public LoginMessage() {
-	}
-
 	public AbstractPacket getPacket() {
 		return packet;
-	}
-
-	public void setPacket(AbstractPacket pa) {
-		this.packet = pa;
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class GUILogin {
 
 	public static final String
 			MODID = "guilogin",
-			VERSION = "1.0.1",
+			VERSION = "1.0.3",
 			NAME = "GUILogin";
 
 	public static Logger modLogger;
@@ -79,7 +79,7 @@ public class GUILogin {
 
 	@Mod.EventHandler
 	public void onServerStopping(FMLServerStoppingEvent event) {
-		if (config.isModEnabled())
+		if (config.isModEnabled() && accountMgr != null)
 			accountMgr.writeToFile();
 	}
 
