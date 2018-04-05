@@ -7,3 +7,18 @@ gl.login.success=§a成功登录！
 gl.login.timeout=你必须在%s秒内完成登录！
 gl.login.illegalname=用户名里不得含有特殊字符！
 gl.reg.success=§a成功注册！
+
+commands.guilogin.usage=/guilogin <子命令>
+commands.guilogin.usage.nosuchcommand=§c命令 "%s" 不存在
+
+subcommand.sync.success=成功保存帐号密码到磁盘
+
+subcommand.deluser.usage=/guilogin deluser <用户名>
+subcommand.deluser.success=用户 %s 已删除
+subcommand.deluser.notfound=§c找不到用户 %s
+
+subcommand.chpw.usage=/guilogin changepassword <用户名> <明文密码>
+subcommand.chpw.success=密码已更改
+subcommand.chpw.failure=§c找不到用户
+
+subcommand.reload.success=已重新加载用户密码数据

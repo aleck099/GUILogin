@@ -7,3 +7,18 @@ gl.login.success=§aLogin Successful!
 gl.login.timeout=You must login or register in %s seconds!
 gl.login.illegalname=Your name is illegal.
 gl.reg.success=§aSuccessfully registered!
+
+commands.guilogin.usage=/guilogin <subcommand>
+commands.guilogin.usage.nosuchcommand=§cNo such sub command "%s"
+
+subcommand.sync.success=Successfully saved accounts and passwords to file
+
+subcommand.deluser.usage=/guilogin deluser <user>
+subcommand.deluser.success=User %s is deleted
+subcommand.deluser.notfound=§cUser %s not found
+
+subcommand.chpw.usage=/guilogin changepassword <user> <password>
+subcommand.chpw.success=Password changed
+subcommand.chpw.failure=§cUser not found
+
+subcommand.reload.success=Reloaded accounts

@@ -1,15 +1,23 @@
 package guilogin.db;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class AccountMgr {
 
-	private File cfgFile;
+	private Path cfgFile;
 
 	private Set<Account> accounts;
 
@@ -21,17 +29,17 @@ public class AccountMgr {
 	 * @throws NullPointerException 如果 cfgFile = null
 	 * @throws IOException          如果文件不存在，且无法创建
 	 */
-	public AccountMgr(File cfgFile) throws IOException {
+	public AccountMgr(Path cfgFile) throws IOException {
 		if (cfgFile == null)
 			throw new NullPointerException("Config file is null");
 
 		this.cfgFile = cfgFile;
-		if (!this.cfgFile.exists()) {
-			File parent = this.cfgFile.getParentFile();
-			if (!parent.exists())
-				parent.mkdirs();
+		if (!Files.exists(cfgFile)) {
+			Path parent = cfgFile.getParent();
+			if (!Files.exists(parent))
+				Files.createDirectories(parent);
 
-			this.cfgFile.createNewFile();
+			Files.createFile(cfgFile);
 		}
 
 		this.accounts = new HashSet<>();
@@ -39,11 +47,9 @@ public class AccountMgr {
 
 	@Nullable
 	private Account findByName(String name) {
-		synchronized (this.accounts) {
-			for (Account a : this.accounts) {
-				if (a.name.equals(name))
-					return a;
-			}
+		for (Account a : accounts) {
+			if (a.name.equals(name))
+				return a;
 		}
 		return null;
 	}
@@ -86,44 +92,38 @@ public class AccountMgr {
 	 *
 	 * @param name    用户名
 	 * @param newPass 新密码
+	 * @return 如果成功，返回true
 	 */
-	public void resetPasswd(String name, String newPass) {
+	public boolean resetPasswd(String name, String newPass) {
 		Account a = findByName(name);
 		if (a == null)
-			return;
+			return false;
 		a.resetPasswd(byte2str(encrypt(newPass, name)));
+		return true;
 	}
 
 	/**
-	 * 删除帐号
 	 *
-	 * @param name 要删除的用户名
+	 * @param name 用户名
+	 * @return 如果成功删除，返回true
 	 */
-	public void deleteAccount(String name) {
-		synchronized (this.accounts) {
-			Iterator<Account> it = this.accounts.iterator();
-			while (it.hasNext()) {
-				Account a = it.next();
-				if (a.name.equals(name))
-					it.remove();
-			}
-		}
+	public boolean deleteAccount(String name) {
+		return this.accounts.removeIf(a -> a.name.equals(name));
 	}
 
 	/**
 	 * 把数据库写入文件
 	 */
 	public void writeToFile() {
-		try {
-			this.cfgFile.delete();
-			this.cfgFile.createNewFile();
-			PrintWriter oWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.cfgFile), Charset.forName("utf-8")));
-			synchronized (this.accounts) {
-				for (Account a : this.accounts) {
-					oWriter.println(a.name + ':' + a.getPasswd());
-				}
+		try (
+				BufferedWriter oWriter = Files.newBufferedWriter(cfgFile, Charset.forName("utf-8"));
+		) {
+			for (Account a : this.accounts) {
+				oWriter.write(a.name);
+				oWriter.write(':');
+				oWriter.write(a.getPasswd());
+				oWriter.write('\n');
 			}
-			oWriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -133,21 +133,18 @@ public class AccountMgr {
 	 * 从文件中读取数据
 	 */
 	public void readFromFile() {
+		accounts.clear();
 		try {
-			BufferedReader iReader = new BufferedReader(new InputStreamReader(new FileInputStream(this.cfgFile), Charset.forName("utf-8")));
-			synchronized (this.accounts) {
-				while (true) {
-					String arg = iReader.readLine();
-					if (arg == null)
-						break;
-					String[] sargs = arg.split(":", 2);
-					if (sargs.length < 2)
-						continue;
-					this.accounts.add(new Account(sargs[0], sargs[1]));
-				}
-			}
-			iReader.close();
-		} catch (IOException | ArrayIndexOutOfBoundsException e) {
+			Files
+					.lines(cfgFile, Charset.forName("utf-8"))
+					.forEach(s -> {
+						String[] data = s.split(":", 2);
+						if (data.length != 2)
+							return;
+
+						accounts.add(new Account(data[0], data[1]));
+					});
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -201,16 +198,13 @@ public class AccountMgr {
 	 * @return true 代表用户已经注册过了， false 代表用户是新来的
 	 */
 	public boolean isRegistered(String name) {
-		if (findByName(name) == null)
-			return false;
-		// else
-		return true;
+		return findByName(name) != null;
 	}
 
 	private String byte2str(byte[] b) {
 		if (b == null)
 			return "";
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int lo = 0; lo < b.length; lo++) {
 			byte bt = b[lo];
 			sb.append(Integer.toHexString((int) bt & 0xff));
@@ -224,14 +218,9 @@ public class AccountMgr {
 	 * @param prefix 前缀
 	 * @return 匹配的用户
 	 */
-	public List<String> matches(String prefix) {
+	public List<String> getNamesMatches(String prefix) {
 		List<String> ls = new ArrayList<>();
-		synchronized (this.accounts) {
-			for (Account a : accounts) {
-				if (a.name.startsWith(prefix))
-					ls.add(a.name);
-			}
-		}
+		accounts.stream().filter(a -> a.name.startsWith(prefix)).forEach(a -> ls.add(a.name));
 		return ls;
 	}
 
@@ -242,11 +231,7 @@ public class AccountMgr {
 	 */
 	public List<String> getAccounts() {
 		List<String> ls = new ArrayList<>();
-		synchronized (this.accounts) {
-			for (Account a : accounts) {
-				ls.add(a.name);
-			}
-		}
+		accounts.forEach(a -> ls.add(a.name));
 		return ls;
 	}
 

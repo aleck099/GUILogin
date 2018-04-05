@@ -1,5 +1,6 @@
 package guilogin;
 
+import guilogin.commands.*;
 import guilogin.db.AccountMgr;
 import guilogin.db.PlayerInfo;
 import net.minecraft.server.MinecraftServer;
@@ -19,7 +20,7 @@ public class GUILogin {
 
 	public static final String
 			MODID = "guilogin",
-			VERSION = "1.0.4",
+			VERSION = "1.1.0",
 			NAME = "GUILogin";
 
 	public static Logger modLogger;
@@ -57,7 +58,7 @@ public class GUILogin {
 	public void preInit(FMLPreInitializationEvent event) {
 		GUILogin.modLogger = event.getModLog();
 		/*读取配置文件*/
-		proxy.configInit(event.getModConfigurationDirectory());
+		proxy.configInit(event.getModConfigurationDirectory().toPath());
 
 		/*只有在配置文件中启用mod，才会生效*/
 		if (config.isModEnabled())
@@ -75,6 +76,13 @@ public class GUILogin {
 	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
 		server = event.getServer();
+
+		CommandGuilogin cg = new CommandGuilogin();
+		cg.registerSubCommand(new SubCommandSync());
+		cg.registerSubCommand(new SubCommandDeluser());
+		cg.registerSubCommand(new SubCommandChangePassword());
+		cg.registerSubCommand(new SubCommandReload());
+		event.registerServerCommand(cg);
 	}
 
 	@Mod.EventHandler

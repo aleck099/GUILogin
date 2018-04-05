@@ -14,15 +14,16 @@ import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 
 public class CommonProxy {
 
-	public void configInit(File cfgDir) {
+	public void configInit(Path cfgDir) {
 		try {
-			GUILogin.instance.config = new ModConfig(new File(cfgDir, GUILogin.NAME + ".cfg"));
+			GUILogin.instance.config = new ModConfig(cfgDir.resolve(GUILogin.NAME + ".cfg"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -31,7 +32,7 @@ public class CommonProxy {
 	public void preInit(FMLPreInitializationEvent event) {
 
 		try {
-			GUILogin.instance.accountMgr = new AccountMgr(new File(event.getModConfigurationDirectory(), "passwd.txt"));
+			GUILogin.instance.accountMgr = new AccountMgr(event.getModConfigurationDirectory().toPath().resolve("passwd.txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -57,7 +58,7 @@ public class CommonProxy {
 	public static class ClientProxy extends CommonProxy {
 
 		@Override
-		public void configInit(File cfgDir) {
+		public void configInit(Path cfgDir) {
 			GUILogin.instance.config = new ModConfig();
 		}
 
